@@ -1,0 +1,40 @@
+databases:
+  - name: bourse-exchange-db
+    plan: free
+    databaseName: bourse_exchange
+    user: bourse_exchange
+
+services:
+  - type: web
+    name: bourse-exchange
+    runtime: python
+    plan: free
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --log-file -"
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: bourse-exchange-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: ALLOWED_HOSTS
+        value: ".onrender.com"
+      - key: PYTHON_VERSION
+        value: "3.11.9"
+      - key: MONCASH_CLIENT_ID
+        sync: false
+      - key: MONCASH_CLIENT_SECRET
+        sync: false
+      - key: MONCASH_MODE
+        value: "sandbox"
+      - key: NOWPAYMENTS_API_KEY
+        sync: false
+      - key: NOWPAYMENTS_IPN_SECRET
+        sync: false
+      - key: EMAIL_HOST_USER
+        sync: false
+      - key: EMAIL_HOST_PASSWORD
+        sync: false

@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% load wallet_extras %}
+{% block content %}
+<h3 class="mb-3">Déposer des cryptomonnaies</h3>
+<p class="text-muted small">Chaque utilisateur reçoit une adresse de dépôt unique, générée automatiquement, pour chaque cryptomonnaie. Envoyez uniquement via le réseau <strong>TRC20</strong>.</p>
+<div class="row g-3">
+{% for c in currencies %}
+<div class="col-md-5">
+<div class="card p-3">
+<div class="currency-pick mb-3">
+  {% if c.symbol == 'TRX' %}
+    <img src="/static/img/trx.png" alt="{{ c.symbol }}" onerror="this.style.display='none'">
+  {% else %}
+    <img src="/static/img/usdt.png" alt="{{ c.symbol }}" onerror="this.style.display='none'">
+  {% endif %}
+  <div><div class="cc-name">{{ c.display_name }}</div><div class="cc-network">Réseau : {{ c.network.name }}</div></div>
+</div>
+{% with wallets|get_item:c.id as w %}
+  {% if w and w.deposit_address %}
+    <p class="small text-break bg-dark bg-opacity-25 p-2 rounded">{{ w.deposit_address }}</p>
+  {% else %}
+    <a href="{% url 'cryptopay:generate_address' c.id %}" class="btn btn-sm btn-primary w-100">Obtenir mon adresse de dépôt</a>
+  {% endif %}
+{% endwith %}
+</div>
+</div>
+{% endfor %}
+</div>
+{% endblock %}

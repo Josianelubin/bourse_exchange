@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row justify-content-center">
+<div class="col-md-6">
+<div class="card p-4">
+<h3 class="mb-3">Convertir</h3>
+
+<div class="mb-3">
+  <h6 class="swap-label mb-2">Prix actuels (base HTG)</h6>
+  <div class="d-flex flex-column gap-1 small">
+    <div class="d-flex justify-content-between"><span>1 HTG</span><span style="color:var(--bn-yellow)">Devise de base</span></div>
+    {% for c in currencies %}
+    <div class="d-flex justify-content-between">
+      <span>1 {{ c.symbol }}</span>
+      <span style="color:var(--bn-yellow)">{{ c.htg_exchange_rate }} HTG <span class="text-muted">(frais {{ c.conversion_fee_percent }}%)</span></span>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<form method="post" id="convert-form">
+{% csrf_token %}
+
+<div class="swap-box mb-2">
+  <label class="swap-label" for="id_pay_currency">Vous payez avec</label>
+  <div class="d-flex justify-content-between align-items-center gap-2">
+    <input type="number" step="any" min="0" name="amount" id="id_amount" class="form-control" placeholder="0.00" required>
+    {{ form.pay_currency }}
+  </div>
+</div>
+
+<div class="text-center my-2">
+  <button type="button" id="swap-btn" class="btn btn-sm btn-dark rounded-circle" style="width:44px;height:44px;">
+    <div class="icon icon-refresh"></div>
+  </button>
+</div>
+
+<div class="swap-box mb-3">
+  <label class="swap-label">Vous recevez</label>
+  <div class="d-flex justify-content-between align-items-center gap-2">
+    <span class="swap-amount" id="receive-amount">0.00</span>
+    {{ form.receive_currency }}
+  </div>
+</div>
+
+<div id="convert-preview" class="alert alert-warning d-none small"></div>
+<button type="submit" class="btn btn-dark w-100 py-2 fw-bold">Convertir</button>
+</form>
+</div>
+</div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const rates = {
+    'HTG': { rate: 1, fee: 0 },
+    {% for c in currencies %}'{{ c.symbol }}': { rate: {{ c.htg_exchange_rate }}, fee: {{ c.conversion_fee_percent }} },{% endfor %}
+  };
+
+  const paySelect = document.getElementById('id_pay_currency');
+  const receiveSelect = document.getElementById('id_receive_currency');
+  const amountInput = document.getElementById('id_amount');
+  const receiveAmountEl = document.getElementById('receive-amount');
+  const preview = document.getElementById('convert-preview');
+  const swapBtn = document.getElementById('swap-btn');
+
+  if (!paySelect || !receiveSelect || !amountInput || !swapBtn) {
+    console.error('Bourse Exchange: élément de conversion introuvable.');
+    return;
+  }
+
+  function recalc() {
+    const payLabel = paySelect.value;
+    const receiveLabel = receiveSelect.value;
+    const amount = parseFloat(amountInput.value);
+    const payInfo = rates[payLabel];
+    const receiveInfo = rates[receiveLabel];
+
+    if (!payInfo || !receiveInfo || !amount || amount <= 0 || payLabel === receiveLabel) {
+      receiveAmountEl.textContent = '0.00';
+      preview.classList.add('d-none');
+      return;
+    }
+
+    const htgValue = amount * payInfo.rate;
+    const feePay = htgValue * (payInfo.fee / 100);
+    const afterPay = htgValue - feePay;
+    const feeReceive = afterPay * (receiveInfo.fee / 100);
+    const afterReceive = afterPay - feeReceive;
+    const received = afterReceive / receiveInfo.rate;
+    const totalFee = feePay + feeReceive;
+
+    receiveAmountEl.textContent = received.toFixed(8);
+    preview.innerHTML = `Vous recevrez environ <strong>${received.toFixed(8)} ${receiveLabel}</strong> `
+      + `pour ${amount} ${payLabel} (frais totaux : ${totalFee.toFixed(2)} HTG équivalent).`;
+    preview.classList.remove('d-none');
+  }
+
+  swapBtn.addEventListener('click', function (e) {
+    e.preventDefault();
+    const payVal = paySelect.value;
+    const receiveVal = receiveSelect.value;
+    paySelect.value = receiveVal;
+    receiveSelect.value = payVal;
+    recalc();
+  });
+
+  paySelect.addEventListener('change', recalc);
+  receiveSelect.addEventListener('change', recalc);
+  amountInput.addEventListener('input', recalc);
+  amountInput.addEventListener('keyup', recalc);
+  recalc();
+});
+</script>
+{% endblock %}

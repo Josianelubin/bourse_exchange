@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="auth-wrapper">
+<div class="auth-card">
+<h3><span class="brand-accent">Bourse</span> Exchange</h3>
+<form method="post">{% csrf_token %}
+<div class="mb-3"><label class="form-label">Nom d'utilisateur</label>
+<input type="text" name="username" class="form-control" required autofocus></div>
+<div class="mb-3"><label class="form-label">Mot de passe</label>
+<input type="password" name="password" class="form-control" required></div>
+<button class="btn btn-dark w-100 py-2">Se connecter</button>
+</form>
+<p class="mt-3 mb-1"><a href="{% url 'accounts:password_reset' %}">Mot de passe oublié ?</a></p>
+<p class="mb-0">Pas de compte ? <a href="{% url 'accounts:register' %}">Créer un compte</a></p>
+</div>
+</div>
+{% endblock %}

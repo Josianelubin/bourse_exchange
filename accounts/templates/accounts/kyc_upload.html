@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row justify-content-center">
+<div class="col-md-6">
+<div class="card p-4">
+<h3 class="mb-2">Vérification d'identité</h3>
+<p class="text-muted small mb-3">
+  Obligatoire pour accéder aux dépôts, retraits et conversions. Envoyez le recto et le verso
+  de votre carte d'identité ou passeport, puis un selfie. Pour chaque champ, vous pouvez
+  choisir une photo déjà enregistrée sur votre téléphone OU prendre la photo directement
+  avec l'appareil photo.
+</p>
+
+{% if verification.status == 'PENDING' %}
+  <div class="alert alert-warning">⏳ Vos documents sont en attente de vérification par un administrateur.</div>
+{% elif verification.status == 'APPROVED' %}
+  <div class="alert alert-success">✅ Votre identité a été vérifiée. Vous avez accès à toutes les fonctionnalités.</div>
+{% elif verification.status == 'REJECTED' %}
+  <div class="alert alert-danger">
+    ❌ Votre vérification a été rejetée{% if verification.rejection_reason %} : {{ verification.rejection_reason }}{% endif %}.
+    Merci de renvoyer des documents plus clairs.
+  </div>
+{% endif %}
+
+<form method="post" enctype="multipart/form-data">
+{% csrf_token %}
+<div class="mb-3">
+  <label class="form-label">Carte d'identité ou passeport — RECTO</label>
+  {{ form.id_document_front }}
+</div>
+<div class="mb-3">
+  <label class="form-label">Carte d'identité ou passeport — VERSO</label>
+  {{ form.id_document_back }}
+</div>
+<div class="mb-3">
+  <label class="form-label">Selfie</label>
+  {{ form.selfie }}
+  <div class="form-text">En pleine lumière, visage bien visible.</div>
+</div>
+<button class="btn btn-dark w-100 py-2 fw-bold">Envoyer pour vérification</button>
+</form>
+</div>
+</div>
+</div>
+{% endblock %}

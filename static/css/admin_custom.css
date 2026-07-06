@@ -1,0 +1,116 @@
+/* ============================================================
+   Bourse Exchange — CSS admin (Jazzmin) : login + interface
+   Place le logo sous : static/img/nono.png (carré, fond transparent, 512x512 conseillé)
+   ============================================================ */
+
+/* ============================================================
+   LOGO — page de connexion admin
+   ============================================================ */
+.login-page .login-logo,
+.login-box .login-logo {
+  margin-bottom: 1.2rem;
+}
+.login-page .login-logo img,
+.login-box .login-logo img,
+.login-box img.login-logo-img,
+.login-page img.login-logo-img {
+  width: 90px;
+  height: 90px;
+  object-fit: cover;
+  border-radius: 50%;
+  background: #12151c;
+  padding: 4px;
+  border: 2px solid #ffc107;
+  box-shadow: 0 0 0 3px #12151c, 0 0 25px rgba(255, 193, 7, 0.45);
+  display: block;
+  margin: 0 auto 0.75rem;
+  animation: be-logo-glow 3s ease-in-out infinite;
+}
+/* Filet de sécurité : si Jazzmin génère malgré tout un deuxième logo (light/dark),
+   on masque tous les logos sauf le premier pour éviter le doublon visuel. */
+.login-page .login-logo img:nth-of-type(n+2),
+.login-box .login-logo img:nth-of-type(n+2) {
+  display: none !important;
+}
+@keyframes be-logo-glow {
+  0%, 100% { box-shadow: 0 0 0 3px #12151c, 0 0 15px rgba(255, 193, 7, 0.35); }
+  50%      { box-shadow: 0 0 0 3px #12151c, 0 0 30px rgba(255, 193, 7, 0.6); }
+}
+.login-page .login-box-msg {
+  color: #9aa3af !important;
+}
+
+/* ============================================================
+   LOGO — interface admin (sidebar / barre de marque en haut à gauche)
+   ============================================================ */
+.brand-link {
+  display: flex !important;
+  align-items: center;
+  gap: 10px;
+  padding-top: .7rem;
+  padding-bottom: .7rem;
+}
+.brand-image, .brand-image-xl, img.brand-image {
+  width: 34px !important;
+  height: 34px !important;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 2px solid #ffc107;
+  box-shadow: 0 0 10px rgba(255, 193, 7, 0.4);
+  margin-right: 0 !important;
+  float: none !important;
+}
+.brand-text {
+  font-weight: 700;
+  letter-spacing: .3px;
+  color: #ffc107 !important;
+}
+
+/* --- Page de connexion admin --- */
+body.login {
+  background: radial-gradient(circle at top, #1b2735 0%, #090a0f 100%) !important;
+}
+.login-page .login-box, .login-page .card {
+  border-radius: 16px !important;
+  box-shadow: 0 20px 50px rgba(0,0,0,.55) !important;
+  border: 1px solid rgba(255,193,7,.25) !important;
+  background: #12151c !important;
+}
+.login-box .login-logo, .login-page .login-logo {
+  color: #ffc107 !important;
+  font-weight: 700;
+  letter-spacing: .5px;
+}
+.login-card-body {
+  background: #12151c !important;
+  color: #e9ecef !important;
+  border-radius: 16px !important;
+}
+.login-card-body .form-control {
+  background: #1c212b !important;
+  color: #fff !important;
+  border: 1px solid #2c333f !important;
+}
+.login-card-body .form-control:focus {
+  border-color: #ffc107 !important;
+  box-shadow: 0 0 0 .2rem rgba(255,193,7,.25) !important;
+}
+.login-card-body .btn-primary {
+  background: linear-gradient(135deg, #ffc107, #ff9800) !important;
+  border: none !important;
+  font-weight: 600;
+  color: #12151c !important;
+}
+.login-card-body .btn-primary:hover { filter: brightness(1.08); }
+
+/* --- Interface admin générale --- */
+.main-sidebar { box-shadow: 3px 0 15px rgba(0,0,0,.3); }
+.brand-link { border-bottom: 1px solid rgba(255,193,7,.2) !important; }
+.nav-sidebar > .nav-item > .nav-link.active {
+  background: linear-gradient(90deg, rgba(255,193,7,.18), transparent) !important;
+  border-left: 3px solid #ffc107;
+}
+.card { border-radius: 12px !important; }
+.card-primary.card-outline { border-top: 3px solid #ffc107 !important; }
+.small-box { border-radius: 12px !important; }
+.btn-warning { color:#12151c !important; font-weight:600; }

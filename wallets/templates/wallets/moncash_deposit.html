@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row justify-content-center">
+<div class="col-md-6">
+<div class="card p-4">
+<div class="mb-3"><img src="/static/img/moncash.png" alt="MonCash" style="height:36px" onerror="this.outerHTML='<span class=\"moncash-badge\">📱 MonCash</span>'"></div>
+<h3 class="mb-3">Déposer via MonCash</h3>
+<p class="small text-muted">Frais de dépôt actuels : <span style="color:var(--bn-yellow)">{{ fee_percent }}%</span></p>
+<form method="post" id="deposit-form">{% csrf_token %}{{ form.as_p }}
+<div id="deposit-preview" class="alert alert-warning d-none small"></div>
+<button class="btn btn-success w-100 py-2">Payer avec MonCash</button>
+</form>
+</div>
+</div>
+</div>
+<script>
+(function() {
+  const feePercent = {{ fee_percent }};
+  const input = document.querySelector('#deposit-form input[name=amount]');
+  const preview = document.getElementById('deposit-preview');
+  function recalc() {
+    const amount = parseFloat(input.value);
+    if (!amount || amount <= 0) { preview.classList.add('d-none'); return; }
+    const fee = amount * (feePercent / 100);
+    const net = amount - fee;
+    preview.innerHTML = `Vous payez <strong>${amount.toFixed(2)} HTG</strong>, vous recevrez <strong>${net.toFixed(2)} HTG</strong> sur votre portefeuille (frais : ${fee.toFixed(2)} HTG).`;
+    preview.classList.remove('d-none');
+  }
+  if (input) { input.addEventListener('input', recalc); recalc(); }
+})();
+</script>
+{% endblock %}

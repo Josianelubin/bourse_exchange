@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row justify-content-center">
+<div class="col-md-6">
+<div class="card p-4">
+<div class="mb-3"><img src="/static/img/moncash.png" alt="MonCash" style="height:36px" onerror="this.outerHTML='<span class=\"moncash-badge\">📱 MonCash</span>'"></div>
+<h3 class="mb-3">Retirer vers MonCash</h3>
+<p class="small text-muted">Frais de retrait actuels : <span style="color:var(--bn-yellow)">{{ fee_percent }}%</span></p>
+<form method="post" id="withdraw-form">{% csrf_token %}{{ form.as_p }}
+<div id="withdraw-preview" class="alert alert-warning d-none small"></div>
+<button class="btn btn-outline-success w-100 py-2">Demander le retrait</button>
+</form>
+</div>
+</div>
+</div>
+<script>
+(function() {
+  const feePercent = {{ fee_percent }};
+  const input = document.querySelector('#withdraw-form input[name=amount]');
+  const preview = document.getElementById('withdraw-preview');
+  function recalc() {
+    const amount = parseFloat(input.value);
+    if (!amount || amount <= 0) { preview.classList.add('d-none'); return; }
+    const fee = amount * (feePercent / 100);
+    const total = amount + fee;
+    preview.innerHTML = `Vous recevrez <strong>${amount.toFixed(2)} HTG</strong> sur MonCash. Total débité de votre solde : <strong>${total.toFixed(2)} HTG</strong> (frais : ${fee.toFixed(2)} HTG).`;
+    preview.classList.remove('d-none');
+  }
+  if (input) { input.addEventListener('input', recalc); recalc(); }
+})();
+</script>
+{% endblock %}

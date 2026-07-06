@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% load wallet_extras %}
+{% block content %}
+<div class="row g-3">
+  <div class="col-md-4">
+    <div class="card balance-card p-4 h-100">
+      <h6>Solde total HTG</h6>
+      <h2>{{ htg_wallet.balance }} HTG</h2>
+    </div>
+  </div>
+  <div class="col-md-8">
+    <div class="card p-3 h-100">
+      <h6 class="mb-3">Portefeuilles Crypto</h6>
+      {% for w in crypto_wallets %}
+      <div class="currency-pick mb-2">
+        {% if w.currency.symbol == 'TRX' %}
+          <img src="/static/img/trx.png" alt="TRX" onerror="this.style.display='none'">
+        {% else %}
+          <img src="/static/img/usdt.png" alt="USDT" onerror="this.style.display='none'">
+        {% endif %}
+        <div class="flex-fill">
+          <div class="cc-name">{{ w.currency.display_name }}</div>
+          <div class="cc-network">≈ {{ w.balance|floatformat:2 }} {{ w.currency.symbol }}</div>
+        </div>
+        <strong>{{ w.balance }}</strong>
+      </div>
+      {% empty %}
+      <p class="text-muted">Aucun portefeuille crypto encore actif.</p>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<div class="row row-cols-3 row-cols-md-5 g-2 my-4 text-center">
+  <div class="col"><a href="{% url 'moncash:deposit' %}" class="btn btn-success w-100 py-3 h-100 d-flex flex-column align-items-center justify-content-center"><div class="icon icon-download" style="width:1.6em;height:1.6em"></div><small class="mt-1">Dépôt HTG</small></a></div>
+  <div class="col"><a href="{% url 'moncash:withdraw' %}" class="btn btn-outline-success w-100 py-3 h-100 d-flex flex-column align-items-center justify-content-center"><div class="icon icon-upload" style="width:1.6em;height:1.6em"></div><small class="mt-1">Retrait HTG</small></a></div>
+  <div class="col"><a href="{% url 'cryptopay:deposit_address' %}" class="btn btn-primary w-100 py-3 h-100 d-flex flex-column align-items-center justify-content-center"><div class="icon icon-wallet" style="width:1.6em;height:1.6em"></div><small class="mt-1">Dépôt Crypto</small></a></div>
+  <div class="col"><a href="{% url 'wallets:crypto_withdraw' %}" class="btn btn-outline-primary w-100 py-3 h-100 d-flex flex-column align-items-center justify-content-center"><div class="icon icon-send" style="width:1.6em;height:1.6em"></div><small class="mt-1">Retrait Crypto</small></a></div>
+  <div class="col"><a href="{% url 'wallets:convert' %}" class="btn btn-dark w-100 py-3 h-100 d-flex flex-column align-items-center justify-content-center"><div class="icon icon-refresh" style="width:1.6em;height:1.6em"></div><small class="mt-1">Convertir</small></a></div>
+</div>
+
+<div class="card p-3 mb-4">
+  <h6 class="mb-3">Répartition du portefeuille</h6>
+  <canvas id="portfolioChart" height="90"></canvas>
+</div>
+
+<div class="card p-3">
+<h6>Dernières transactions</h6>
+<table class="table table-hover">
+<thead><tr><th>Type</th><th>Montant</th><th>Statut</th><th>Date</th></tr></thead>
+<tbody>
+{% for tx in recent_tx %}
+<tr><td>{{ tx.get_type_display }}</td><td>{{ tx.amount }} {{ tx.currency_label }}</td>
+<td><span class="badge bg-secondary">{{ tx.get_status_display }}</span></td><td>{{ tx.created_at|date:"d/m/Y H:i" }}</td></tr>
+{% empty %}<tr><td colspan="4">Aucune transaction.</td></tr>{% endfor %}
+</tbody></table>
+<a href="{% url 'wallets:history' %}">Voir tout l'historique →</a>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script>
+const ctx = document.getElementById('portfolioChart');
+new Chart(ctx, {
+  type: 'doughnut',
+  data: {
+    labels: ['HTG'{% for w in crypto_wallets %}, '{{ w.currency.symbol }}'{% endfor %}],
+    datasets: [{
+      data: [{{ htg_wallet.balance|floatformat:2 }}{% for w in crypto_wallets %}, {{ w.balance|floatformat:8 }}{% endfor %}],
+      backgroundColor: ['#F0B90B', '#0ECB81', '#3375BB', '#F6465D', '#8247E5'],
+      borderColor: '#181A20',
+      borderWidth: 3,
+    }]
+  },
+  options: {
+    plugins: { legend: { labels: { color: '#EAECEF' } } },
+    cutout: '65%',
+  }
+});
+</script>
+{% endblock %}

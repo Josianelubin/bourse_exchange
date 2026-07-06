@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row justify-content-center">
+<div class="col-md-6">
+<div class="card p-4">
+<h3 class="mb-3">Retirer des cryptomonnaies</h3>
+
+<div class="d-flex gap-3 mb-4">
+  <div class="currency-pick flex-fill">
+    <img src="/static/img/usdt.png" alt="USDT" onerror="this.style.display='none'">
+    <div><div class="cc-name">USDT</div><div class="cc-network">Réseau : TRC20</div></div>
+  </div>
+  <div class="currency-pick flex-fill">
+    <img src="/static/img/trx.png" alt="TRX" onerror="this.style.display='none'">
+    <div><div class="cc-name">TRX (Tronx)</div><div class="cc-network">Réseau : TRC20</div></div>
+  </div>
+</div>
+
+<p class="text-warning small">⚠️ Seul le réseau <strong>TRC20</strong> est accepté pour USDT et TRX.
+Envoyer vers un autre réseau entraîne une perte définitive des fonds.</p>
+
+<form method="post">{% csrf_token %}{{ form.as_p }}
+<button class="btn btn-primary w-100 py-2">Demander le retrait</button>
+</form>
+</div>
+</div>
+</div>
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row justify-content-center">
+<div class="col-md-6">
+<div class="card p-4">
+<h3 class="mb-3">Paramètres du compte</h3>
+
+<h6 class="text-muted mb-2">Informations</h6>
+<ul class="list-group mb-4">
+  <li class="list-group-item">Nom d'utilisateur : {{ user.username }}</li>
+</ul>
+
+<div class="d-flex flex-column gap-2">
+  <a href="{% url 'accounts:kyc_upload' %}" class="btn btn-outline-light d-flex align-items-center gap-2">
+    <div class="icon icon-idcard"></div> Vérification d'identité
+  </a>
+  <a href="{% url 'accounts:profile' %}" class="btn btn-outline-light d-flex align-items-center gap-2">
+    <div class="icon icon-user"></div> Modifier mon profil
+  </a>
+  <a href="{% url 'accounts:delete_account' %}" class="btn btn-outline-danger d-flex align-items-center gap-2">
+    <div class="icon icon-trash"></div> Supprimer mon compte
+  </a>
+</div>
+</div>
+</div>
+</div>
+{% endblock %}

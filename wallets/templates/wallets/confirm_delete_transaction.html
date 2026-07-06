@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card p-4 col-md-6">
+<h4>Retirer cette transaction de votre historique ?</h4>
+<p>{{ tx.get_type_display }} — {{ tx.amount }} {{ tx.currency_label }} — {{ tx.created_at|date:"d/m/Y H:i" }}</p>
+<p class="text-danger">Cette suppression est <strong>définitive</strong> : aucune trace ne sera conservée nulle part.</p>
+<form method="post">{% csrf_token %}
+<button class="btn btn-danger">Confirmer la suppression</button>
+<a href="{% url 'wallets:history' %}" class="btn btn-outline-secondary">Annuler</a>
+</form>
+</div>
+{% endblock %}
