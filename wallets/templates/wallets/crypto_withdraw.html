@@ -1,23 +1,31 @@
 {% extends "base.html" %}
+{% load wallet_extras %}
 {% block content %}
 <div class="row justify-content-center">
 <div class="col-md-6">
 <div class="card p-4">
-<h3 class="mb-3">Retirer des cryptomonnaies</h3>
-
-<div class="d-flex gap-3 mb-4">
-  <div class="currency-pick flex-fill">
-    <img src="/static/img/usdt.png" alt="USDT" onerror="this.style.display='none'">
-    <div><div class="cc-name">USDT</div><div class="cc-network">Réseau : TRC20</div></div>
-  </div>
-  <div class="currency-pick flex-fill">
-    <img src="/static/img/trx.png" alt="TRX" onerror="this.style.display='none'">
-    <div><div class="cc-name">TRX (Tronx)</div><div class="cc-network">Réseau : TRC20</div></div>
-  </div>
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h3 class="mb-0">Retirer des cryptomonnaies</h3>
+  <a href="{% url 'accounts:logout' %}" class="btn btn-sm btn-outline-danger d-flex align-items-center gap-1" title="Déconnexion">
+    <div class="icon icon-logout" style="width:1.1em;height:1.1em;"></div>
+  </a>
 </div>
 
-<p class="text-warning small">⚠️ Seul le réseau <strong>TRC20</strong> est accepté pour USDT et TRX.
-Envoyer vers un autre réseau entraîne une perte définitive des fonds.</p>
+<div class="row row-cols-3 g-2 mb-4 text-center">
+  {% for c in currencies %}
+  <div class="col">
+    <div class="currency-pick flex-column" style="padding:.5rem;">
+      <img src="{{ c.symbol|crypto_logo }}" alt="{{ c.symbol }}" onerror="this.style.display='none'" style="width:24px;height:24px;">
+      <div class="cc-name" style="font-size:.75rem;">{{ c.symbol }}</div>
+      <div class="cc-network" style="font-size:.62rem;">{{ c.network.name }}</div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<p class="text-warning small">⚠️ Vérifiez soigneusement l'adresse et le réseau de destination :
+les transactions blockchain sont irréversibles. Chaque devise n'accepte que son propre réseau
+(indiqué ci-dessus).</p>
 
 <form method="post">{% csrf_token %}{{ form.as_p }}
 <button class="btn btn-primary w-100 py-2">Demander le retrait</button>

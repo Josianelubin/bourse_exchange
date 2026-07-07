@@ -49,15 +49,19 @@ def fetch_crypto_usd_prices(coingecko_ids):
 
 
 def update_all_htg_rates():
-    """Met à jour htg_exchange_rate pour USDT et TRX à partir des prix réels du marché.
-    Retourne un résumé texte des changements effectués (pour affichage dans l'admin)."""
+    """Met à jour htg_exchange_rate pour toutes les cryptos actives à partir des prix
+    réels du marché. Retourne un résumé texte des changements effectués (pour affichage
+    dans l'admin)."""
     from wallets.models import CryptoCurrency
 
+    mapping = {
+        'USDTTRC20': 'tether', 'TRX': 'tron',
+        'BTC': 'bitcoin', 'ETH': 'ethereum', 'MATIC': 'matic-network', 'SOL': 'solana',
+    }
     usd_to_htg = fetch_usd_to_htg_rate()
-    prices_usd = fetch_crypto_usd_prices(['tether', 'tron'])
+    prices_usd = fetch_crypto_usd_prices(list(mapping.values()))
 
     results = []
-    mapping = {'USDTTRC20': 'tether', 'TRX': 'tron'}
     for symbol, coingecko_id in mapping.items():
         if coingecko_id not in prices_usd:
             continue

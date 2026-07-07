@@ -19,7 +19,7 @@ logger = logging.getLogger('transactions')
 @login_required
 def dashboard_view(request):
     htg_wallet = request.user.htg_wallet
-    crypto_wallets = request.user.crypto_wallets.select_related('currency').all()
+    crypto_wallets = request.user.crypto_wallets.select_related('currency').filter(currency__is_active=True)
     recent_tx = request.user.transactions.filter(hidden_by_user=False)[:8]
     return render(request, 'wallets/dashboard.html', {
         'htg_wallet': htg_wallet,
@@ -202,7 +202,9 @@ def crypto_withdraw_view(request):
             return redirect('wallets:history')
     else:
         form = CryptoWithdrawForm()
-    return render(request, 'wallets/crypto_withdraw.html', {'form': form})
+    return render(request, 'wallets/crypto_withdraw.html', {
+        'form': form, 'currencies': CryptoCurrency.objects.filter(is_active=True),
+    })
 
 
 @csrf_exempt

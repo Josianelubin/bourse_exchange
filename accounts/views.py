@@ -126,9 +126,15 @@ def delete_account_view(request):
 @ratelimit(key='ip', rate='5/h', block=True)
 def password_reset_view(request):
     """Enveloppe la vue standard de Django avec une limite de débit, pour empêcher
-    qu'un attaquant spamme les e-mails de réinitialisation vers n'importe quel utilisateur."""
+    qu'un attaquant spamme les e-mails de réinitialisation vers n'importe quel utilisateur.
+    success_url doit être explicitement préfixé par 'accounts:' — sans ça, Django cherche
+    'password_reset_done' au niveau global au lieu de l'espace de noms de l'app."""
     from django.contrib.auth import views as auth_views
-    return auth_views.PasswordResetView.as_view(template_name='accounts/password_reset.html')(request)
+    from django.urls import reverse_lazy
+    return auth_views.PasswordResetView.as_view(
+        template_name='accounts/password_reset.html',
+        success_url=reverse_lazy('accounts:password_reset_done'),
+    )(request)
 
 
 @login_required

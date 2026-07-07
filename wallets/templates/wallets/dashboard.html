@@ -13,14 +13,10 @@
       <h6 class="mb-3">Portefeuilles Crypto</h6>
       {% for w in crypto_wallets %}
       <div class="currency-pick mb-2">
-        {% if w.currency.symbol == 'TRX' %}
-          <img src="/static/img/trx.png" alt="TRX" onerror="this.style.display='none'">
-        {% else %}
-          <img src="/static/img/usdt.png" alt="USDT" onerror="this.style.display='none'">
-        {% endif %}
+        <img src="{{ w.currency.symbol|crypto_logo }}" alt="{{ w.currency.symbol }}" onerror="this.style.display='none'" style="width:26px;height:26px;">
         <div class="flex-fill">
           <div class="cc-name">{{ w.currency.display_name }}</div>
-          <div class="cc-network">≈ {{ w.balance|floatformat:2 }} {{ w.currency.symbol }}</div>
+          <div class="cc-network">Réseau : {{ w.currency.network.name }}</div>
         </div>
         <strong>{{ w.balance }}</strong>
       </div>
@@ -66,7 +62,7 @@ new Chart(ctx, {
     labels: ['HTG'{% for w in crypto_wallets %}, '{{ w.currency.symbol }}'{% endfor %}],
     datasets: [{
       data: [{{ htg_wallet.balance|floatformat:2 }}{% for w in crypto_wallets %}, {{ w.balance|floatformat:8 }}{% endfor %}],
-      backgroundColor: ['#F0B90B', '#0ECB81', '#3375BB', '#F6465D', '#8247E5'],
+      backgroundColor: ['#F0B90B', '#0ECB81', '#3375BB', '#F6465D', '#8247E5', '#00D4AA'],
       borderColor: '#181A20',
       borderWidth: 3,
     }]

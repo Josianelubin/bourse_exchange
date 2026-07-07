@@ -158,7 +158,14 @@ que sur une **base de données neuve**. Si tu as déjà lancé le site avant cet
 va corriger manuellement ces champs dans l'admin — la création automatique ne modifie jamais
 une ligne qui existe déjà.
 
-## Mettre à jour les prix HTG/USDT/TRX — manuellement ou vraiment automatiquement
+## Mettre à jour les prix des 6 cryptomonnaies — manuellement ou vraiment automatiquement
+
+⚠️ **À propos de "chaque minute"** : CoinGecko gratuit autorise 10 000 appels/mois. Une mise à
+jour toutes les minutes, 24h/24, consommerait environ 43 000 appels/mois — bien au-dessus de la
+limite gratuite. Une mise à jour **toutes les 15 à 30 minutes** reste largement dans la limite
+gratuite (environ 1500 à 3000 appels/mois) et donne déjà des prix très à jour pour ce type de
+site. Tu choisis toi-même la fréquence exacte dans cron-job.org (voir plus bas) — libre à toi
+d'aller plus vite si tu acceptes de passer sur un plan CoinGecko payant.
 
 ### Option 1 — Bouton manuel (le plus simple)
 
@@ -221,24 +228,55 @@ toujours modifier les taux manuellement en attendant.
 - **Barre de navigation mobile flottante** façon capture d'écran fournie (icône active en cercle
   surélevé) — visible en bas de l'écran sur mobile, cachée sur grand écran.
 
-## Logos à ajouter toi-même (3 fichiers)
+## Logos à ajouter toi-même (7 fichiers)
 
 Le code référence maintenant des fichiers locaux (plus de dépendance à un CDN externe) :
 
 | Fichier à créer | Utilisé pour |
 |---|---|
 | `static/img/nono.png` | Logo du site + favicon + logo admin |
-| `static/img/usdt.png` | Logo USDT (dépôt, retrait, tableau de bord) |
-| `static/img/trx.png` | Logo TRX/Tronx (dépôt, retrait, tableau de bord) |
+| `static/img/usdt.png` | Logo USDT |
+| `static/img/trx.png` | Logo TRX/Tronx |
+| `static/img/bitcoin.png` | Logo Bitcoin |
+| `static/img/etherum.png` | Logo Ethereum |
+| `static/img/Matic.png` | Logo Polygon/Matic |
+| `static/img/sol.png` | Logo Solana |
 | `static/img/moncash.png` | Logo MonCash (dépôt/retrait HTG) — si absent, un badge texte stylisé s'affiche automatiquement à la place |
 
-Pour USDT/TRX, tu peux télécharger des icônes libres de droits (licence MIT) ici, puis les
-renommer `usdt.png` / `trx.png` :
+Pour les cryptos, tu peux télécharger des icônes libres de droits (licence MIT) ici, puis les
+renommer exactement comme dans le tableau ci-dessus :
 - https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/128/color/usdt.png
 - https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/128/color/trx.png
+- https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/128/color/btc.png
+- https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/128/color/eth.png
+- https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/128/color/matic.png
+- https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/128/color/sol.png
+
+Si un fichier n'est pas encore ajouté, l'image se masque proprement (pas d'icône cassée) —
+le site continue de fonctionner normalement en attendant.
 
 Pour le logo MonCash officiel, télécharge-le depuis le portail MonCash Business (droits Digicel) —
 si tu ne le fais pas, le site continue de fonctionner normalement avec le badge texte de secours.
+
+## Cryptomonnaies disponibles et leurs réseaux
+
+| Devise | Réseau accepté | Frais de retrait | Minimum de retrait | Frais de conversion |
+|---|---|---|---|---|
+| USDT | TRC20 (Tron) | 2 USDT (fixe) | 10 USDT | 2% |
+| TRX (Tronx) | TRC20 (Tron) | 3 TRX (fixe) | 13 TRX | 2% |
+| BTC (Bitcoin) | Bitcoin | 3% | Aucun minimum | 2% |
+| ETH (Ethereum) | ERC20 | 3% | Aucun minimum | 2% |
+| MATIC (Polygon) | Polygon | 3% | Aucun minimum | 2% |
+| SOL (Solana) | Solana | 3% | Aucun minimum | 2% |
+
+Chaque utilisateur reçoit automatiquement une adresse de dépôt différente et réelle pour
+chacune de ces 6 cryptomonnaies (générée via NOWPayments, comme pour USDT/TRX). Le réseau
+de chaque devise est affiché clairement sur les pages de dépôt et de retrait, pour éviter
+qu'un utilisateur envoie par erreur sur le mauvais réseau.
+
+⚠️ Ces valeurs par défaut ne s'appliquent qu'à une base de données neuve — si le site tourne
+déjà, ajoute-les toi-même dans `/gestion-secrete/wallets/cryptocurrency/` et
+`/gestion-secrete/wallets/cryptonetwork/`.
 
 ## Faire fonctionner "Mot de passe oublié" (envoi réel par Gmail)
 
