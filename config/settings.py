@@ -50,6 +50,13 @@ else:
                 CSRF_TRUSTED_ORIGINS.append(_origin)
 
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
+
+# URL absolue du site, utilisée quand aucune requête HTTP n'est disponible pour construire
+# l'URL nous-mêmes (ex: génération d'adresse de dépôt automatique à l'inscription, dans un
+# signal Django). Priorité : variable d'environnement explicite, sinon déduite du domaine Render.
+SITE_URL = env('SITE_URL', default='')
+if not SITE_URL and RENDER_EXTERNAL_HOSTNAME:
+    SITE_URL = f"https://{RENDER_EXTERNAL_HOSTNAME}"
 if RENDER_EXTERNAL_HOSTNAME and RENDER_EXTERNAL_HOSTNAME not in ALLOWED_HOSTS:
     ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
 

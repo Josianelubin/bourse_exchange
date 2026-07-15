@@ -6,6 +6,7 @@ from django.contrib import messages
 from django.db import transaction as db_transaction
 from django.http import HttpResponse, HttpResponseForbidden
 from django.shortcuts import render, redirect
+from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
@@ -32,13 +33,27 @@ def generate_address_view(request, currency_id):
     if not wallet.deposit_address:
         try:
             client = NowPaymentsClient()
-            data = client.create_deposit_address(order_id=f"user{request.user.id}-{currency.symbol}",
-                                                   pay_currency=currency.symbol)
-            wallet.deposit_address = data.get('pay_address', '')
-            wallet.save(update_fields=['deposit_address'])
+            callback_url = request.build_absolute_uri(reverse('cryptopay:nowpayments_webhook'))
+            data = client.create_deposit_address(
+                order_id=f"user{request.user.id}-{currency.symbol}",
+                pay_currency=currency.symbol,
+                ipn_callback_url=callback_url,
+            )
+            address = data.get('pay_address', '')
+            if not address:
+                logger.error("NOWPayments n'a renvoyé aucune adresse pour user=%s devise=%s : %s",
+                             request.user.id, currency.symbol, data)
+                messages.error(request, "NOWPayments n'a pas renvoyé d'adresse. Vérifie que la devise "
+                                        f"'{currency.symbol}' est bien activée sur ton compte NOWPayments "
+                                        "et que Custody est activée.")
+            else:
+                wallet.deposit_address = address
+                wallet.save(update_fields=['deposit_address'])
         except Exception:
             logger.exception("Erreur génération adresse NOWPayments pour user=%s", request.user.id)
-            messages.error(request, "Impossible de générer une adresse pour le moment.")
+            messages.error(request, "Impossible de générer une adresse pour le moment. "
+                                    "Vérifie tes clés API NOWPayments et consulte les logs du serveur "
+                                    "pour le message d'erreur exact.")
     return redirect('cryptopay:deposit_address')
 
 

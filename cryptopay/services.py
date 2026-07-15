@@ -19,10 +19,12 @@ class NowPaymentsClient:
         self.api_key = settings.NOWPAYMENTS_API_KEY
         self.headers = {"x-api-key": self.api_key, "Content-Type": "application/json"}
 
-    def create_deposit_address(self, order_id, pay_currency):
+    def create_deposit_address(self, order_id, pay_currency, ipn_callback_url):
         """Génère une adresse de dépôt dédiée pour un utilisateur/devise.
         (NOWPayments utilise le endpoint 'payment' avec invoice, adapté ici en mode adresse statique
-        via le endpoint /payment pour recevoir des fonds vers le compte marchand.)"""
+        via le endpoint /payment pour recevoir des fonds vers le compte marchand.)
+        ipn_callback_url DOIT être une vraie URL absolue (https://...) : NOWPayments rejette
+        les callbacks vides ou invalides avec une erreur 400."""
         resp = requests.post(
             f"{BASE_URL}/payment",
             headers=self.headers,
@@ -31,10 +33,17 @@ class NowPaymentsClient:
                 "price_currency": "usd",
                 "pay_currency": pay_currency,
                 "order_id": str(order_id),
-                "ipn_callback_url": settings.NOWPAYMENTS_IPN_CALLBACK_URL if hasattr(settings, 'NOWPAYMENTS_IPN_CALLBACK_URL') else "",
+                "ipn_callback_url": ipn_callback_url,
             },
             timeout=15,
         )
+        if not resp.ok:
+            # Log le message d'erreur exact renvoyé par NOWPayments (invisible sinon),
+            # essentiel pour diagnostiquer pourquoi une adresse ne se génère pas.
+            import logging
+            logging.getLogger('transactions').error(
+                "NOWPayments create_deposit_address a échoué (%s): %s", resp.status_code, resp.text
+            )
         resp.raise_for_status()
         return resp.json()
 

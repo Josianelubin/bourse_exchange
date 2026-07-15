@@ -19,6 +19,12 @@ logger = logging.getLogger('transactions')
 @login_required
 def dashboard_view(request):
     htg_wallet = request.user.htg_wallet
+    # Garantit qu'un portefeuille (même à 0) existe pour chaque devise active, pour qu'il
+    # apparaisse toujours dans "Portefeuilles Crypto" — sans ça, il ne se crée que lors
+    # du premier passage sur la page de dépôt, ce qui laissait le tableau de bord vide.
+    for currency in CryptoCurrency.objects.filter(is_active=True):
+        CryptoWallet.objects.get_or_create(user=request.user, currency=currency)
+
     crypto_wallets = request.user.crypto_wallets.select_related('currency').filter(currency__is_active=True)
     recent_tx = request.user.transactions.filter(hidden_by_user=False)[:8]
     return render(request, 'wallets/dashboard.html', {

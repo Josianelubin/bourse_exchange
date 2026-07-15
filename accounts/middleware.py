@@ -1,6 +1,7 @@
 from django.contrib.auth import logout
 from django.shortcuts import redirect
 from django.contrib import messages
+from django.utils.http import url_has_allowed_host_and_scheme
 
 
 class BlockedUserMiddleware:
@@ -19,19 +20,19 @@ class BlockedUserMiddleware:
 
 
 class KYCRequiredMiddleware:
-    """Bloque l'accès à toutes les fonctionnalités financières du site (portefeuille,
-    MonCash, crypto) tant que la vérification d'identité de l'utilisateur n'est pas
-    approuvée par un administrateur. Le profil, les paramètres, la déconnexion et la
-    page de vérification elle-même restent toujours accessibles."""
+    """Laisse les utilisateurs consulter librement leur tableau de bord et les pages de
+    dépôt/retrait/conversion (le dashboard doit toujours être visible). En revanche, dès
+    qu'ils appuient sur un bouton pour VALIDER une action réelle (dépôt, retrait, conversion),
+    un message clair s'affiche s'ils n'ont pas encore été vérifiés — l'action est bloquée,
+    mais la navigation ne l'est jamais."""
 
-    # Apps dont l'accès nécessite un KYC approuvé
     PROTECTED_APPS = {'wallets', 'moncash', 'cryptopay'}
 
     def __init__(self, get_response):
         self.get_response = get_response
 
     def __call__(self, request):
-        if request.user.is_authenticated and not request.user.is_staff:
+        if request.method == 'POST' and request.user.is_authenticated and not request.user.is_staff:
             match = request.resolver_match
             app_name = match.app_name if match else None
             if app_name in self.PROTECTED_APPS:
@@ -40,8 +41,14 @@ class KYCRequiredMiddleware:
                 if status != 'APPROVED':
                     messages.warning(
                         request,
-                        "Vous devez d'abord faire vérifier votre identité (pièce d'identité + selfie) "
-                        "avant d'accéder aux fonctionnalités du site."
+                        "⚠️ Il faut vérifier votre identité avant de pouvoir effectuer cette action "
+                        "(dépôt, retrait ou conversion). Rendez-vous dans Paramètres → Vérification "
+                        "d'identité pour envoyer votre pièce d'identité et un selfie."
                     )
-                    return redirect('accounts:kyc_upload')
+                    referer = request.META.get('HTTP_REFERER')
+                    if referer and url_has_allowed_host_and_scheme(
+                        referer, allowed_hosts={request.get_host()}, require_https=request.is_secure()
+                    ):
+                        return redirect(referer)
+                    return redirect('wallets:dashboard')
         return self.get_response(request)

@@ -35,15 +35,27 @@ def create_crypto_wallets_with_address(sender, instance, created, **kwargs):
 
     from cryptopay.services import NowPaymentsClient  # import différé, évite les imports circulaires
 
+    if not settings.SITE_URL:
+        # Impossible de construire une URL de callback IPN valide (aucune requête HTTP
+        # disponible dans un signal, et SITE_URL non configurée) : NOWPayments rejette les
+        # callbacks vides. L'adresse sera générée plus tard, à la première visite de la
+        # page de dépôt (où l'URL réelle de la requête est disponible).
+        logger.warning("SITE_URL non configurée : génération d'adresse à l'inscription ignorée "
+                        "pour user=%s (sera générée à la première visite de la page de dépôt).",
+                        instance.id)
+        return
+
     for currency in CryptoCurrency.objects.filter(is_active=True):
         wallet, _ = CryptoWallet.objects.get_or_create(user=instance, currency=currency)
         if wallet.deposit_address or not settings.NOWPAYMENTS_API_KEY:
             continue
         try:
             client = NowPaymentsClient()
+            callback_url = f"{settings.SITE_URL}/crypto/webhook/nowpayments/"
             data = client.create_deposit_address(
                 order_id=f"user{instance.id}-{currency.symbol}",
                 pay_currency=currency.symbol,
+                ipn_callback_url=callback_url,
             )
             address = data.get('pay_address', '')
             if address:
